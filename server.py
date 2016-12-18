@@ -100,9 +100,9 @@ class Handler(tornado.websocket.WebSocketHandler):
     def open(self):
         print("new client")
         clients.append(self)
-        self.write_message('{"lightstate":"'+("1" if lightstate else "0") +
-                           '","type":"control"}'
-                           )
+        self.write_message(json.dumps(
+            {"lightstate": int(lightstate), "type": "valid"}
+        ))
 
     def on_message(self, data):
         try:
@@ -132,8 +132,9 @@ class Handler(tornado.websocket.WebSocketHandler):
                         client.write_message(client_message)
 
                 elif message["type"] == "check":
-                    self.write_message('{"lightstate":"' + ('0' if lightstate
-                                       else '0') + '","type":"valid"}')
+                    self.write_message(json.dumps(
+                        {"lightstate": int(lightstate), "type": "valid"}
+                    ))
                 elif message["type"] == "signout":
                     validClients.remove(self)
             else:
