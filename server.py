@@ -30,8 +30,9 @@ validClients = []
 lightstate = False
 password = open(r"password.txt", encoding="utf-8").read().strip()
 secret = ''
-def init():
 
+
+def init():
     secret = getRandomString(100)
 
     GPIO.setup(23, GPIO.OUT)
