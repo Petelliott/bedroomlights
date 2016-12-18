@@ -114,30 +114,23 @@ class Handler(tornado.websocket.WebSocketHandler):
                     turnOn()
                 elif message["type"] == "off":
                     turnOff()
-                elif message["type"] == "fan_off":
-                    GPIO.output(fan_low, GPIO.LOW)
-                    GPIO.output(fan_mid, GPIO.LOW)
-                    GPIO.output(fan_high, GPIO.LOW)
+                elif message["type"].startswith("fan_"):
+                    GPIO.output(fan_low, (message["type"] == "fan_low"))
+                    GPIO.output(fan_mid, (message["type"] == "fan_mid"))
+                    GPIO.output(fan_high, (message["type"] == "fan_high"))
+
+                    if message["type"] == "fan_off":
+                        client_message = '{"fanstate":"0","type":"fan"}'
+                    elif message["type"] == "fan_low":
+                        client_message = '{"fanstate":"1","type":"fan"}'
+                    elif message["type"] == "fan_mid":
+                        client_message = '{"fanstate":"2","type":"fan"}'
+                    elif message["type"] == "fan_high":
+                        client_message = '{"fanstate":"3","type":"fan"}'
+
                     for client in clients:
-                        client.write_message('{"fanstate":"0","type":"fan"}')
-                elif message["type"] == "fan_low":
-                    GPIO.output(fan_low, GPIO.HIGH)
-                    GPIO.output(fan_mid, GPIO.HIGH)
-                    GPIO.output(fan_high, GPIO.LOW)
-                    for client in clients:
-                        client.write_message('{"fanstate":"1","type":"fan"}')
-                elif message["type"] == "fan_mid":
-                    GPIO.output(fan_low, GPIO.LOW)
-                    GPIO.output(fan_mid, GPIO.HIGH)
-                    GPIO.output(fan_high, GPIO.LOW)
-                    for client in clients:
-                        client.write_message('{"fanstate":"2","type":"fan"}')
-                elif message["type"] == "fan_high":
-                    GPIO.output(fan_low, GPIO.LOW)
-                    GPIO.output(fan_mid, GPIO.LOW)
-                    GPIO.output(fan_high, GPIO.HIGH)
-                    for client in clients:
-                        client.write_message('{"fanstate":"3","type":"fan"}')
+                        client.write_message(client_message)
+
                 elif message["type"] == "check":
                     self.write_message('{"lightstate":"' + ('0' if lightstate
                                        else '0') + '","type":"valid"}')
